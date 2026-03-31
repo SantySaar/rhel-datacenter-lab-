@@ -1,6 +1,6 @@
 # rhel-datacenter-lab 🏗️
 
-> Portfolio técnico: datacenter completo automatizado con Ansible sobre AlmaLinux 9 (compatible RHEL 9).
+> Portfolio técnico: datacenter completo automatizado con Ansible sobre Rocky Linux 9 (compatible RHEL 9).
 > Demuestra la formación oficial Red Hat completa: **RH124 · RH134 · RH358 · RH294/AU374/AU467 · EX188**
 
 ---
