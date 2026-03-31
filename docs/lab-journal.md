@@ -7,7 +7,7 @@
 
 ## Formato de entrada
 
-```
+
 ## Día X — DD/MM/YYYY
 **Tiempo dedicado:** X horas
 **Avances:**
@@ -88,7 +88,7 @@ Solución: Regenerar el certificado manualmente con el flag correcto
 - Arreglar rol storage (LVM requiere disco /dev/sdb — añadirlo en Vagrantfile)
 - Subir proyecto a GitHub con commits reales
 
-```
+
 ## Día 2 — 31/03/2026
 **Tiempo dedicado:** 6 horas
 
