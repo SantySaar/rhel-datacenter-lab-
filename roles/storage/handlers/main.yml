@@ -1,0 +1,5 @@
+---
+- name: restart crond
+  ansible.builtin.service:
+    name: crond
+    state: restarted

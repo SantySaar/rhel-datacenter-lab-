@@ -1,0 +1,110 @@
+---
+# roles/podman/tasks/main.yml — EX188
+# Podman rootless + integración systemd
+
+- name: Install Podman
+  ansible.builtin.dnf:
+    name:
+      - podman
+      - slirp4netns
+      - fuse-overlayfs
+    state: present
+  tags: podman
+
+- name: Enable lingering for vagrant user (rootless systemd)
+  ansible.builtin.command:
+    cmd: loginctl enable-linger vagrant
+    creates: /var/lib/systemd/linger/vagrant
+  tags: podman
+
+- name: Create directory for Podman HTML content
+  ansible.builtin.file:
+    path: /srv/podman/html
+    state: directory
+    owner: vagrant
+    group: vagrant
+    mode: '0755'
+  tags: podman
+
+- name: Deploy content for Podman container
+  ansible.builtin.copy:
+    dest: /srv/podman/html/index.html
+    content: |
+      <!DOCTYPE html>
+      <html>
+      <head><title>Podman Container</title>
+      <style>body{background:#0a0a0a;color:#e8e8e8;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}
+      .box{text-align:center;border:1px solid #EE0000;padding:2rem 3rem}
+      h1{color:#EE0000;font-size:1.5rem}p{color:#888;font-size:.9rem}</style>
+      </head>
+      <body><div class="box">
+      <h1>📦 Podman Container</h1>
+      <p>Contenedor rootless corriendo con Podman</p>
+      <p>Gestionado por systemd · EX188</p>
+      </div></body></html>
+    owner: vagrant
+    group: vagrant
+    mode: '0644'
+  tags: podman
+
+- name: Pull Nginx image
+  containers.podman.podman_image:
+    name: docker.io/library/nginx
+    tag: alpine
+    state: present
+  become: false
+  become_user: vagrant
+  tags: podman
+
+- name: Create Podman container
+  containers.podman.podman_container:
+    name: "{{ item.name }}"
+    image: "docker.io/library/nginx:alpine"
+    state: started
+    ports: "{{ item.ports }}"
+    volumes: "{{ item.volumes }}"
+    restart_policy: always
+  loop: "{{ podman_containers }}"
+  become: false
+  become_user: vagrant
+  tags: podman
+
+- name: Create systemd user directory
+  ansible.builtin.file:
+    path: /home/vagrant/.config/systemd/user
+    state: directory
+    owner: vagrant
+    group: vagrant
+    mode: '0755'
+  tags: podman
+
+- name: Generate systemd unit for container
+  ansible.builtin.command:
+    cmd: "podman generate systemd --new --name {{ item.name }} --files"
+    chdir: "/home/vagrant/.config/systemd/user/"
+  loop: "{{ podman_containers }}"
+  become: false
+  become_user: vagrant
+  tags: podman
+
+
+- name: Enable container service via systemd
+  ansible.builtin.systemd:
+    name: "container-{{ item.name }}"
+    enabled: true
+    daemon_reload: true
+    scope: user
+  loop: "{{ podman_containers }}"
+  become: false
+  become_user: vagrant
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/1000"
+  tags: podman
+
+- name: Open Podman container port in firewalld
+  ansible.posix.firewalld:
+    port: "8090/tcp"
+    state: enabled
+    permanent: true
+    immediate: true
+  tags: podman, firewall

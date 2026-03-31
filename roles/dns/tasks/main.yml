@@ -1,0 +1,46 @@
+---
+# roles/dns/tasks/main.yml — RH358
+- name: Install BIND9
+  ansible.builtin.dnf:
+    name:
+      - bind
+      - bind-utils
+    state: present
+  tags: dns
+
+- name: Deploy named.conf
+  ansible.builtin.template:
+    src: named.conf.j2
+    dest: /etc/named.conf
+    owner: root
+    group: named
+    mode: '0640'
+    setype: named_conf_t
+  notify: restart named
+  tags: dns
+
+- name: Deploy forward zone file
+  ansible.builtin.template:
+    src: zone.lab.local.j2
+    dest: "/var/named/{{ lab_domain }}.zone"
+    owner: root
+    group: named
+    mode: '0640'
+    setype: named_zone_t
+  notify: restart named
+  tags: dns
+
+- name: Open DNS in firewalld
+  ansible.posix.firewalld:
+    service: dns
+    state: enabled
+    permanent: true
+    immediate: true
+  tags: dns, firewall
+
+- name: Enable and start named
+  ansible.builtin.service:
+    name: named
+    state: started
+    enabled: true
+  tags: dns

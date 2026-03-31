@@ -1,0 +1,6 @@
+---
+# playbooks/hardening.yml — RH134
+- name: Apply CIS hardening to all servers
+  hosts: all_managed
+  roles:
+    - hardening

@@ -1,0 +1,75 @@
+---
+# roles/hardening/tasks/main.yml — RH134
+
+- name: Ensure SELinux is enforcing
+  ansible.posix.selinux:
+    policy: targeted
+    state: enforcing
+  tags: hardening, selinux
+
+- name: Install and enable firewalld
+  ansible.builtin.dnf:
+    name: firewalld
+    state: present
+  tags: hardening, firewall
+
+- name: Start and enable firewalld
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: true
+  tags: hardening, firewall
+
+- name: Harden SSH configuration
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    validate: 'sshd -t -f %s'
+  loop:
+    - { regexp: '^#?PermitRootLogin',        line: 'PermitRootLogin no' }
+    - { regexp: '^#?PasswordAuthentication', line: 'PasswordAuthentication no' }
+    - { regexp: '^#?X11Forwarding',          line: 'X11Forwarding no' }
+    - { regexp: '^#?MaxAuthTries',           line: 'MaxAuthTries 4' }
+    - { regexp: '^#?ClientAliveInterval',    line: 'ClientAliveInterval 300' }
+    - { regexp: '^#?LoginGraceTime',         line: 'LoginGraceTime 60' }
+    - { regexp: '^#?Banner',                 line: 'Banner /etc/ssh/banner' }
+  notify: restart sshd
+  tags: hardening, ssh
+
+- name: Deploy SSH banner
+  ansible.builtin.copy:
+    dest: /etc/ssh/banner
+    content: |
+      ############################################################
+      #   Acceso restringido · Sistema administrado por Ansible  #
+      #   Toda actividad es registrada y monitorizada            #
+      ############################################################
+    mode: '0644'
+  tags: hardening, ssh
+
+- name: Install and enable auditd
+  ansible.builtin.dnf:
+    name: audit
+    state: present
+  tags: hardening, audit
+
+- name: Start auditd
+  ansible.builtin.service:
+    name: auditd
+    state: started
+    enabled: true
+  tags: hardening, audit
+
+- name: Set password quality policy
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  loop:
+    - { regexp: '^# ?minlen',  line: 'minlen = 12' }
+    - { regexp: '^# ?dcredit', line: 'dcredit = -1' }
+    - { regexp: '^# ?ucredit', line: 'ucredit = -1' }
+    - { regexp: '^# ?ocredit', line: 'ocredit = -1' }
+    - { regexp: '^# ?lcredit', line: 'lcredit = -1' }
+  tags: hardening, password

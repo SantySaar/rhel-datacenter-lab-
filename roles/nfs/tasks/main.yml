@@ -1,0 +1,47 @@
+---
+# roles/nfs/tasks/main.yml — RH358
+
+- name: Install NFS server
+  ansible.builtin.dnf:
+    name: nfs-utils
+    state: present
+  tags: nfs
+
+- name: Create export directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: nobody
+    group: nobody
+    mode: '0777'
+  loop: "{{ nfs_exports }}"
+  tags: nfs
+
+- name: Deploy /etc/exports
+  ansible.builtin.template:
+    src: exports.j2
+    dest: /etc/exports
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reload nfs exports
+  tags: nfs
+
+- name: Open NFS services in firewalld
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  loop:
+    - nfs
+    - rpc-bind
+    - mountd
+  tags: nfs, firewall
+
+- name: Enable and start nfs-server
+  ansible.builtin.service:
+    name: nfs-server
+    state: started
+    enabled: true
+  tags: nfs

@@ -1,0 +1,51 @@
+---
+# roles/samba/tasks/main.yml — RH358
+
+- name: Install Samba packages
+  ansible.builtin.dnf:
+    name:
+      - samba
+      - samba-client
+      - samba-common
+    state: present
+  tags: samba
+
+- name: Create Samba share directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: nobody
+    group: nobody
+    mode: '0775'
+    setype: samba_share_t
+  loop: "{{ samba_shares }}"
+  tags: samba
+
+- name: Deploy smb.conf
+  ansible.builtin.template:
+    src: smb.conf.j2
+    dest: /etc/samba/smb.conf
+    owner: root
+    group: root
+    mode: '0644'
+    validate: 'testparm -s %s'
+  notify: restart smb
+  tags: samba
+
+- name: Open Samba in firewalld
+  ansible.posix.firewalld:
+    service: samba
+    state: enabled
+    permanent: true
+    immediate: true
+  tags: samba, firewall
+
+- name: Enable and start Samba services
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - smb
+    - nmb
+  tags: samba

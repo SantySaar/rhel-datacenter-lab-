@@ -1,0 +1,3 @@
+---
+- name: reload sudo
+  ansible.builtin.command: visudo -c

@@ -1,0 +1,20 @@
+#!/bin/bash
+# backup.sh.j2 — generado por Ansible (RH134: scripting + cron)
+DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_DIR="/backup/${DATE}"
+SRC_DIRS="{{ backup_source_dirs | default('/etc /var/named /srv/nfs') }}"
+
+echo "[$DATE] Iniciando backup..."
+mkdir -p "${BACKUP_DIR}"
+
+for DIR in ${SRC_DIRS}; do
+  if [ -d "${DIR}" ]; then
+    rsync -avz --delete "${DIR}" "${BACKUP_DIR}/"
+    echo "[$DATE] OK: ${DIR}"
+  else
+    echo "[$DATE] WARN: ${DIR} no existe"
+  fi
+done
+
+find /backup -maxdepth 1 -type d -mtime +7 -exec rm -rf {} \; 2>/dev/null
+echo "[$DATE] Backup completado en ${BACKUP_DIR}"

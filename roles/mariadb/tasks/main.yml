@@ -1,0 +1,55 @@
+---
+# roles/mariadb/tasks/main.yml — RH358
+
+- name: Install MariaDB server
+  ansible.builtin.dnf:
+    name:
+      - mariadb-server
+      - python3-PyMySQL
+    state: present
+  tags: mariadb
+
+- name: Enable and start MariaDB
+  ansible.builtin.service:
+    name: mariadb
+    state: started
+    enabled: true
+  tags: mariadb
+
+- name: Set MariaDB root password
+  community.mysql.mysql_user:
+    name: root
+    password: "{{ mariadb_root_password }}"
+    login_unix_socket: /var/lib/mysql/mysql.sock
+    state: present
+  ignore_errors: true
+  tags: mariadb
+
+- name: Create application databases
+  community.mysql.mysql_db:
+    name: "{{ item.name }}"
+    state: present
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+  loop: "{{ mariadb_databases }}"
+  tags: mariadb
+
+- name: Create application users
+  community.mysql.mysql_user:
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+    priv: "{{ item.priv }}"
+    state: present
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+  loop: "{{ mariadb_users }}"
+  notify: restart mariadb
+  tags: mariadb
+
+- name: Open MariaDB port for lab network only
+  ansible.posix.firewalld:
+    rich_rule: "rule family='ipv4' source address='{{ lab_network }}' service name='mysql' accept"
+    state: enabled
+    permanent: true
+    immediate: true
+  tags: mariadb, firewall

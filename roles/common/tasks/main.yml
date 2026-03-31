@@ -1,0 +1,51 @@
+---
+# roles/common/tasks/main.yml — RH124
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+  tags: common
+
+- name: Update /etc/hosts with lab nodes
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: "{{ item }}"
+    state: present
+  loop:
+    - "192.168.56.10 control.lab.local control"
+    - "192.168.56.20 web.lab.local web"
+    - "192.168.56.30 services.lab.local services"
+  tags: common
+
+- name: Install common packages
+  ansible.builtin.dnf:
+    name:
+      - vim
+      - bash-completion
+      - net-tools
+      - bind-utils
+      - tcpdump
+      - wget
+      - curl
+      - git
+      - chrony
+    state: present
+  tags: common, packages
+
+- name: Enable and start chronyd
+  ansible.builtin.service:
+    name: chronyd
+    state: started
+    enabled: true
+  tags: common
+
+- name: Set timezone to Europe/Madrid
+  community.general.timezone:
+    name: Europe/Madrid
+  tags: common
+
+- name: Distribute SSH public key from control
+  ansible.posix.authorized_key:
+    user: vagrant
+    key: "{{ lookup('file', '/home/vagrant/.ssh/id_ed25519.pub') }}"
+    state: present
+  tags: common    

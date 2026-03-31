@@ -1,0 +1,45 @@
+{# roles/haproxy/templates/haproxy.cfg.j2 — RH358 #}
+global
+    log         /dev/log local0
+    chroot      /var/lib/haproxy
+    pidfile     /var/run/haproxy.pid
+    maxconn     4000
+    user        haproxy
+    group       haproxy
+    daemon
+
+defaults
+    mode                    http
+    log                     global
+    option                  httplog
+    option                  dontlognull
+    option                  http-server-close
+    option                  forwardfor except 127.0.0.0/8
+    retries                 3
+    timeout http-request    10s
+    timeout queue           1m
+    timeout connect         10s
+    timeout client          1m
+    timeout server          1m
+    timeout http-keep-alive 10s
+    timeout check           10s
+
+# Stats dashboard — http://web.lab.local:8404/stats
+listen stats
+    bind *:8404
+    stats enable
+    stats uri /stats
+    stats refresh 30s
+    stats show-node
+    stats show-legends
+
+# Frontend — recibe tráfico HTTP en 8080
+frontend lab_http
+    bind *:8080
+    default_backend lab_web
+
+# Backend — servidores web
+backend lab_web
+    balance     roundrobin
+    option      httpchk GET /
+    server      web01 192.168.56.20:80 check inter 2s rise 2 fall 3

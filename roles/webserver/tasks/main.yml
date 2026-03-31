@@ -1,0 +1,76 @@
+---
+# roles/webserver/tasks/main.yml — RH358
+
+- name: Install Apache and SSL module
+  ansible.builtin.dnf:
+    name:
+      - httpd
+      - mod_ssl
+      - openssl
+    state: present
+  tags: webserver
+
+- name: Open HTTP and HTTPS in firewalld
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  loop:
+    - http
+    - https
+  tags: webserver, firewall
+
+- name: Create document root
+  ansible.builtin.file:
+    path: "{{ web_document_root }}"
+    state: directory
+    owner: apache
+    group: apache
+    mode: '0755'
+  tags: webserver
+
+- name: Generate self-signed SSL certificate
+  ansible.builtin.command:
+    cmd: >
+      openssl req -x509 -nodes -days 365
+      -newkey rsa:2048
+      -keyout /etc/pki/tls/private/lab.key
+      -out /etc/pki/tls/certs/lab.crt
+      -subj "/C=ES/ST=Madrid/L=Madrid/O=Lab/CN={{ web_server_name }}"
+    creates: /etc/pki/tls/certs/lab.crt
+  tags: webserver, ssl
+
+- name: Deploy Apache vhost config
+  ansible.builtin.template:
+    src: vhost.conf.j2
+    dest: /etc/httpd/conf.d/lab.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart httpd
+  tags: webserver
+
+- name: Deploy portfolio index page
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: "{{ web_document_root }}/index.html"
+    owner: apache
+    group: apache
+    mode: '0644'
+    setype: httpd_sys_content_t
+  notify: restart httpd
+  tags: webserver
+
+- name: Remove default SSL config
+  ansible.builtin.file:
+    path: /etc/httpd/conf.d/ssl.conf
+    state: absent
+  tags: webserver
+
+- name: Enable and start httpd
+  ansible.builtin.service:
+    name: httpd
+    state: started
+    enabled: true
+  tags: webserver

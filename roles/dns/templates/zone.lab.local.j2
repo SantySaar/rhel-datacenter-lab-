@@ -1,0 +1,17 @@
+{# roles/dns/templates/zone.lab.local.j2 — RH358 #}
+$TTL 86400
+@   IN  SOA services.{{ lab_domain }}. admin.{{ lab_domain }}. (
+            2026030601  ; Serial
+            3600        ; Refresh
+            1800        ; Retry
+            604800      ; Expire
+            86400 )     ; Minimum TTL
+
+@           IN  NS      services.{{ lab_domain }}.
+control     IN  A       192.168.56.10
+web         IN  A       192.168.56.20
+services    IN  A       192.168.56.30
+www         IN  CNAME   web.{{ lab_domain }}.
+dns         IN  CNAME   services.{{ lab_domain }}.
+nfs         IN  CNAME   services.{{ lab_domain }}.
+db          IN  CNAME   services.{{ lab_domain }}.

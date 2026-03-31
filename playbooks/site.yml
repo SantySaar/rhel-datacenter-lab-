@@ -1,0 +1,39 @@
+---
+# =============================================================
+#  site.yml — Playbook principal · rhel-datacenter-lab
+#
+#  Formación cubierta:
+#  RH124 · RH134 · RH358 · RH294/AU374/AU467 · EX188
+#
+#  Uso:
+#    ansible-playbook playbooks/site.yml
+#    ansible-playbook playbooks/site.yml --tags hardening
+#    ansible-playbook playbooks/site.yml --limit webservers
+#    ansible-playbook playbooks/site.yml --check --diff
+# =============================================================
+
+# ── 1. Base en todos los nodos — RH124 + RH134 ──────────────
+- name: "RH124/RH134 · Baseline: common, hardening, users, storage"
+  hosts: all_managed
+  roles:
+    - common      # RH124: paquetes, hostname, /etc/hosts, chrony, timezone
+    - hardening   # RH134: SELinux, firewalld, SSH hardening, auditd, pwquality
+    - users       # RH124: usuarios, grupos, sudoers, SSH authorized_keys
+    - storage     # RH134: LVM, XFS, fstab, cuotas, rsync backup + cron
+
+# ── 2. Servidor web — RH358 + EX188 ─────────────────────────
+- name: "RH358/EX188 · Web: Apache + TLS + HAProxy + Podman"
+  hosts: webservers
+  roles:
+    - webserver   # RH358: Apache, mod_ssl, SSL cert, vhost, portfolio web
+    - haproxy     # RH358: HAProxy load balancer + stats page
+    - podman      # EX188: Podman rootless + contenedor + systemd unit
+
+# ── 3. Servicios de infraestructura — RH358 ─────────────────
+- name: "RH358 · Services: DNS + NFS + Samba + MariaDB"
+  hosts: services
+  roles:
+    - dns         # RH358: BIND9 DNS autoritativo + zona lab.local
+    - nfs         # RH358: NFS server v4 + /etc/exports
+    - samba       # RH358: Samba 4 SMB/CIFS + shares
+    - mariadb     # RH358: MariaDB + databases + users

@@ -1,0 +1,10 @@
+---
+- name: restart podman container
+  ansible.builtin.systemd:
+    name: "container-portfolio-nginx"
+    state: restarted
+    scope: user
+  become: false
+  become_user: vagrant
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/1000"

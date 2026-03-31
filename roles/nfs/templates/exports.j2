@@ -1,0 +1,5 @@
+{# roles/nfs/templates/exports.j2 — RH358 #}
+# /etc/exports — gestionado por Ansible
+{% for export in nfs_exports %}
+{{ export.path }}    {{ export.clients }}
+{% endfor %}

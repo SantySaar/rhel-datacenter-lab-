@@ -1,0 +1,37 @@
+---
+# roles/users/tasks/main.yml — RH124
+
+- name: Create lab groups
+  ansible.builtin.group:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - developers
+    - wheel
+  tags: users
+
+- name: Create lab users
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    groups: "{{ item.groups }}"
+    shell: "{{ item.shell }}"
+    create_home: true
+    state: present
+  loop: "{{ lab_users }}"
+  tags: users
+
+- name: Configure sudoers for wheel group
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s'
+  tags: users, sudo
+
+- name: Deploy authorized_keys for sysadmin
+  ansible.posix.authorized_key:
+    user: sysadmin
+    key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+    state: present
+  ignore_errors: true
+  tags: users, ssh

@@ -1,0 +1,66 @@
+---
+# ── Lab ──────────────────────────────────────────────────────
+lab_domain:  lab.local
+lab_network: "192.168.56.0/24"
+dns_server_ip: "192.168.56.30"
+
+# ── Usuarios (RH124) ─────────────────────────────────────────
+lab_users:
+  - name: sysadmin
+    groups: wheel
+    sudo: true
+    shell: /bin/bash
+  - name: developer
+    groups: developers
+    sudo: false
+    shell: /bin/bash
+
+# ── LVM / Storage (RH134) ────────────────────────────────────
+lvm_volumes:
+  - name: lv_data
+    size: 2g
+    mount: /data
+  - name: lv_backup
+    size: 1g
+    mount: /backup
+backup_source_dirs: "/etc /var/named /srv/nfs /srv/samba"
+
+# ── NFS (RH358) ──────────────────────────────────────────────
+nfs_exports:
+  - path: /srv/nfs/shared
+    clients: "192.168.56.0/24(rw,sync,no_root_squash)"
+  - path: /srv/nfs/readonly
+    clients: "192.168.56.0/24(ro,sync)"
+
+# ── Samba (RH358) ────────────────────────────────────────────
+samba_workgroup: LABGROUP
+samba_shares:
+  - name: public
+    path: /srv/samba/public
+    comment: "Shared public folder"
+    public: "yes"
+    writable: "yes"
+
+# ── MariaDB (RH358) ──────────────────────────────────────────
+mariadb_root_password: "{{ vault_mariadb_root_password }}"
+mariadb_databases:
+  - name: labdb
+  - name: appdb
+mariadb_users:
+  - name: labuser
+    password: "{{ vault_mariadb_app_password }}"
+    priv: "labdb.*:ALL"
+
+# ── Web (RH358) ──────────────────────────────────────────────
+web_server_name: "web.lab.local"
+web_document_root: /var/www/html
+
+# ── Podman (EX188) ───────────────────────────────────────────
+podman_containers:
+  - name: portfolio-nginx
+    image: docker.io/library/nginx:alpine
+    ports:
+      - "8090:80"
+    volumes:
+      - "/srv/podman/html:/usr/share/nginx/html:ro,Z"
+    systemd: true

@@ -1,0 +1,6 @@
+---
+# playbooks/podman.yml — EX188
+- name: Deploy Podman containers on web servers
+  hosts: webservers
+  roles:
+    - podman

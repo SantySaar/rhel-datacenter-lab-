@@ -1,0 +1,301 @@
+{# roles/webserver/templates/index.html.j2 — Portfolio web dinámico (Jinja2 + RH294) #}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Linux & Ansible Engineer · Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--red:#EE0000;--bg:#0a0a0a;--bg2:#111;--border:#222;--text:#e8e8e8;--muted:#666;--green:#00d46a;--mono:'JetBrains Mono',monospace;--display:'Syne',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:14px;line-height:1.7;overflow-x:hidden}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:1rem 2.5rem;background:rgba(10,10,10,.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.logo{font-family:var(--display);font-weight:800;font-size:1rem;color:var(--red)}.logo span{color:var(--text)}
+.nav-links{display:flex;gap:1.8rem;list-style:none}.nav-links a{color:var(--muted);text-decoration:none;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;transition:color .2s}.nav-links a:hover{color:var(--text)}
+.status{display:flex;align-items:center;gap:.4rem;font-size:.7rem;color:var(--green)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:7rem 2.5rem 4rem;position:relative;overflow:hidden}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(238,0,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(238,0,0,.03) 1px,transparent 1px);background-size:60px 60px}
+.glow{position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(238,0,0,.07) 0%,transparent 70%);top:-80px;right:-80px;pointer-events:none}
+.server-info{background:rgba(238,0,0,.06);border:1px solid rgba(238,0,0,.2);padding:.6rem 1.2rem;font-size:.7rem;color:var(--muted);display:flex;gap:2rem;flex-wrap:wrap;margin-bottom:2rem;position:relative;z-index:1}
+.server-info strong{color:var(--red)}
+.eyebrow{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--red);margin-bottom:1.2rem;display:flex;align-items:center;gap:.6rem;position:relative;z-index:1}
+.eyebrow::before{content:'';width:25px;height:1px;background:var(--red)}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(2.5rem,6vw,5.5rem);line-height:.95;letter-spacing:-.03em;margin-bottom:1.2rem;position:relative;z-index:1}
+h1 .red{color:var(--red)} h1 .dim{color:var(--muted);font-weight:400}
+.hero-desc{max-width:500px;color:#999;font-size:.88rem;line-height:1.9;margin-bottom:2.5rem;position:relative;z-index:1}
+.cta{display:flex;gap:1rem;flex-wrap:wrap;position:relative;z-index:1}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.7rem 1.5rem;font-family:var(--mono);font-size:.75rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;text-decoration:none;transition:all .2s}
+.btn-p{background:var(--red);color:#fff}.btn-p:hover{background:#ff2222;transform:translateY(-2px);box-shadow:0 8px 25px rgba(238,0,0,.3)}
+.btn-g{background:transparent;color:var(--text);border:1px solid var(--border)}.btn-g:hover{border-color:var(--text);transform:translateY(-2px)}
+.terminal{position:absolute;right:2.5rem;bottom:3rem;width:400px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;overflow:hidden;font-size:.73rem}
+.tbar{background:#181818;padding:.55rem 1rem;display:flex;align-items:center;gap:.45rem;border-bottom:1px solid var(--border)}
+.td{width:10px;height:10px;border-radius:50%}
+.tbar span{margin-left:auto;color:var(--muted);font-size:.65rem}
+.tbody{padding:1rem;line-height:2}
+.tp{color:var(--red)}.to{color:var(--green)}.tc{color:var(--muted)}
+.cur{display:inline-block;width:7px;height:13px;background:var(--green);vertical-align:middle;animation:blink 1s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+section{padding:5rem 2.5rem}
+.s-label{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--red);margin-bottom:.6rem;display:flex;align-items:center;gap:.5rem}
+.s-label::after{content:'';flex:1;height:1px;background:var(--border);max-width:100px}
+.s-title{font-family:var(--display);font-weight:800;font-size:clamp(1.6rem,3vw,2.5rem);letter-spacing:-.02em;margin-bottom:2.5rem}
+.courses{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.2rem}
+.course{background:var(--bg2);border:1px solid var(--border);padding:1.5rem;transition:border-color .2s,transform .2s}
+.course:hover{border-color:rgba(238,0,0,.4);transform:translateY(-3px)}
+.ccode{font-size:.65rem;letter-spacing:.15em;color:var(--red);text-transform:uppercase;margin-bottom:.4rem}
+.cname{font-family:var(--display);font-weight:700;font-size:.95rem;margin-bottom:.6rem}
+.ctopics{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.8rem}
+.ctag{background:rgba(238,0,0,.07);border:1px solid rgba(238,0,0,.18);color:#bbb;padding:.15rem .5rem;font-size:.63rem;letter-spacing:.04em;text-transform:uppercase}
+.skg{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.2rem}
+.sg{background:var(--bg2);border:1px solid var(--border);padding:1.4rem}
+.sgt{font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.9rem;padding-bottom:.6rem;border-bottom:1px solid var(--border)}
+.si{display:flex;justify-content:space-between;align-items:center;padding:.35rem 0;font-size:.78rem}
+.sb{width:75px;height:3px;background:var(--border);position:relative}.sbf{position:absolute;left:0;top:0;height:100%;background:var(--red)}
+.pg{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.2rem}
+.pc{background:var(--bg2);border:1px solid var(--border);overflow:hidden;transition:border-color .2s,transform .2s}
+.pc:hover{border-color:rgba(238,0,0,.4);transform:translateY(-4px)}
+.ph{padding:1.2rem 1.2rem 0;display:flex;justify-content:space-between;align-items:flex-start}
+.picon{width:38px;height:38px;background:rgba(238,0,0,.1);border:1px solid rgba(238,0,0,.2);display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.plang{font-size:.63rem;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:.3rem}
+.ld{width:7px;height:7px;border-radius:50%}
+.pb{padding:1rem 1.2rem 1.2rem}
+.pt{font-family:var(--display);font-weight:700;font-size:1rem;margin-bottom:.4rem}
+.pd{color:#888;font-size:.76rem;line-height:1.8;margin-bottom:1rem}
+.tags{display:flex;flex-wrap:wrap;gap:.3rem}
+.tag{background:var(--bg);border:1px solid var(--border);padding:.15rem .5rem;font-size:.63rem;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.pf{padding:.9rem 1.2rem;border-top:1px solid var(--border);display:flex;gap:1.2rem}
+.pf a{font-size:.7rem;color:var(--red);text-decoration:none;letter-spacing:.04em;text-transform:uppercase;transition:color .2s}.pf a:hover{color:#ff4444}
+.contact-in{max-width:650px;margin:0 auto;text-align:center}
+.contact-in .s-label{justify-content:center}.contact-in .s-label::after{display:none}
+.cemail{font-family:var(--display);font-size:clamp(1.4rem,3.5vw,2.5rem);font-weight:800;color:var(--red);letter-spacing:-.02em;margin:1.2rem 0}
+.clinks{display:flex;justify-content:center;gap:.8rem;flex-wrap:wrap;margin-top:1.5rem}
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:1.5rem 2.5rem;display:flex;justify-content:space-between;align-items:center;font-size:.7rem;color:var(--muted)}
+footer strong{color:var(--text)}
+.fade-in{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
+.fade-in.v{opacity:1;transform:translateY(0)}
+@media(max-width:800px){nav{padding:1rem 1.2rem}.terminal{display:none}section{padding:3.5rem 1.2rem}footer{flex-direction:column;gap:.5rem;text-align:center}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">SYS<span>_</span>ADMIN</div>
+  <ul class="nav-links">
+    <li><a href="#perfil">Perfil</a></li>
+    <li><a href="#formacion">Formación</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#proyectos">Proyectos</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+  <div class="status"><div class="dot"></div>Disponible</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="glow"></div>
+  <div class="server-info">
+    <span><strong>HOST:</strong> {{ inventory_hostname }}</span>
+    <span><strong>IP:</strong> {{ ansible_default_ipv4.address | default('192.168.56.20') }}</span>
+    <span><strong>OS:</strong> {{ ansible_distribution }} {{ ansible_distribution_version | default('9') }}</span>
+    <span><strong>DEPLOYED:</strong> {{ ansible_date_time.date | default('2026') }}</span>
+    <span><strong>TOOL:</strong> Ansible {{ ansible_version.full | default('2.16') }}</span>
+  </div>
+  <div class="eyebrow">Linux · Ansible · Podman · Red Hat · Madrid</div>
+  <h1>
+    <div>Red Hat</div>
+    <div class="red">Linux &amp;</div>
+    <div>Ansible</div>
+    <div class="dim">Engineer</div>
+  </h1>
+  <p class="hero-desc">
+    Especialista en administración de sistemas RHEL y automatización con Ansible.
+    Formado con el currículo oficial Red Hat: RH124, RH134, RH358 y RH294/AU374/AU467.
+    Esta página está servida por <strong>Apache en RHEL</strong>, desplegada con <strong>Ansible</strong>
+    y acompañada de contenedores <strong>Podman</strong> integrados con systemd.
+  </p>
+  <div class="cta">
+    <a href="#proyectos" class="btn btn-p">▶ Ver proyectos</a>
+    <a href="#contacto" class="btn btn-g">Contactar →</a>
+  </div>
+  <div class="terminal">
+    <div class="tbar">
+      <div class="td" style="background:#ff5f57"></div>
+      <div class="td" style="background:#febc2e"></div>
+      <div class="td" style="background:#28c840"></div>
+      <span>ansible-playbook site.yml</span>
+    </div>
+    <div class="tbody">
+      <div><span class="tp">$</span> ansible-playbook site.yml</div>
+      <div class="tc"># PLAY [Baseline: hardening, users, storage]</div>
+      <div class="to">TASK [hardening : SELinux enforcing] ok</div>
+      <div class="to">TASK [storage : LVM + XFS mounted] ok</div>
+      <div class="tc"># PLAY [Web: Apache + HAProxy + Podman]</div>
+      <div class="to">TASK [webserver : Deploy portfolio] ok</div>
+      <div class="to">TASK [podman : Container running] ok</div>
+      <div class="tc"># PLAY [Services: DNS + NFS + Samba + DB]</div>
+      <div class="to">TASK [dns : BIND9 zone deployed] ok</div>
+      <div class="to">TASK [mariadb : Databases created] ok</div>
+      <div class="tc"># RECAP: web ok=14 services ok=11 failed=0</div>
+      <div><span class="tp">$</span> <span class="cur"></span></div>
+    </div>
+  </div>
+</section>
+
+<section id="perfil" style="background:var(--bg)">
+  <div class="s-label fade-in">01 · Perfil</div>
+  <div class="s-title fade-in">Sobre mí</div>
+  <div style="max-width:680px;color:#999;font-size:.88rem;line-height:1.95" class="fade-in">
+    <p style="margin-bottom:1rem">Profesional IT con formación oficial Red Hat completa en <strong style="color:var(--text)">administración de sistemas RHEL</strong> y <strong style="color:var(--text)">automatización con Ansible Automation Platform</strong>. Mi stack cubre desde la gestión del sistema operativo hasta el despliegue automatizado de servicios de datacenter y contenedores Podman.</p>
+    <p>Construyo infraestructura <strong style="color:var(--text)">reproducible, segura y bien documentada</strong>. Esta página fue desplegada automáticamente con Ansible sobre RHEL — exactamente el tipo de trabajo que hago.</p>
+  </div>
+</section>
+
+<section id="formacion" style="background:var(--bg2)">
+  <div class="s-label fade-in">02 · Formación oficial</div>
+  <div class="s-title fade-in">Currículo Red Hat</div>
+  <div class="courses fade-in">
+    <div class="course">
+      <div class="ccode">RH124 · Fundamentos</div>
+      <div class="cname">System Administration I</div>
+      <p style="color:#888;font-size:.78rem;line-height:1.8">Shell, usuarios, grupos, SSH, DNF, systemd, permisos y NetworkManager.</p>
+      <div class="ctopics"><span class="ctag">Shell</span><span class="ctag">systemd</span><span class="ctag">SSH</span><span class="ctag">DNF</span><span class="ctag">Permisos</span></div>
+    </div>
+    <div class="course">
+      <div class="ccode">RH134 · Avanzado</div>
+      <div class="cname">System Administration II</div>
+      <p style="color:#888;font-size:.78rem;line-height:1.8">LVM, SELinux, firewalld, Grub2, shell scripting, tuning y troubleshooting.</p>
+      <div class="ctopics"><span class="ctag">LVM</span><span class="ctag">SELinux</span><span class="ctag">firewalld</span><span class="ctag">Scripting</span></div>
+    </div>
+    <div class="course">
+      <div class="ccode">RH358 · Servicios</div>
+      <div class="cname">Services Management</div>
+      <p style="color:#888;font-size:.78rem;line-height:1.8">DNS, Apache, MariaDB, NFS, Samba, iSCSI, HAProxy y Varnish.</p>
+      <div class="ctopics"><span class="ctag">DNS</span><span class="ctag">Apache</span><span class="ctag">NFS</span><span class="ctag">MariaDB</span><span class="ctag">HAProxy</span></div>
+    </div>
+    <div class="course">
+      <div class="ccode">RH294 · AU374 · AU467</div>
+      <div class="cname">Linux Automation with Ansible</div>
+      <p style="color:#888;font-size:.78rem;line-height:1.8">Playbooks, Roles, Inventarios, Vault, Collections y AAP 2.x.</p>
+      <div class="ctopics"><span class="ctag">Playbooks</span><span class="ctag">Roles</span><span class="ctag">Vault</span><span class="ctag">Jinja2</span><span class="ctag">AAP</span></div>
+    </div>
+    <div class="course">
+      <div class="ccode">EX188 · Contenedores</div>
+      <div class="cname">Red Hat Specialist in Containers</div>
+      <p style="color:#888;font-size:.78rem;line-height:1.8">Podman CLI, volúmenes, pods, Containerfiles e integración con systemd.</p>
+      <div class="ctopics"><span class="ctag">Podman</span><span class="ctag">Pods</span><span class="ctag">Volumes</span><span class="ctag">systemd</span><span class="ctag">Rootless</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="skills" style="background:var(--bg)">
+  <div class="s-label fade-in">03 · Competencias</div>
+  <div class="s-title fade-in">Stack técnico</div>
+  <div class="skg fade-in">
+    <div class="sg"><div class="sgt">Sistema Operativo</div>
+      <div class="si">RHEL 9/10<div class="sb"><div class="sbf" style="width:90%"></div></div></div>
+      <div class="si">systemd<div class="sb"><div class="sbf" style="width:85%"></div></div></div>
+      <div class="si">Shell Scripting<div class="sb"><div class="sbf" style="width:80%"></div></div></div>
+      <div class="si">LVM / XFS<div class="sb"><div class="sbf" style="width:82%"></div></div></div>
+    </div>
+    <div class="sg"><div class="sgt">Seguridad</div>
+      <div class="si">SELinux<div class="sb"><div class="sbf" style="width:85%"></div></div></div>
+      <div class="si">firewalld<div class="sb"><div class="sbf" style="width:88%"></div></div></div>
+      <div class="si">SSH / PKI<div class="sb"><div class="sbf" style="width:80%"></div></div></div>
+      <div class="si">Ansible Vault<div class="sb"><div class="sbf" style="width:82%"></div></div></div>
+    </div>
+    <div class="sg"><div class="sgt">Automatización</div>
+      <div class="si">Ansible Playbooks<div class="sb"><div class="sbf" style="width:90%"></div></div></div>
+      <div class="si">Roles & Collections<div class="sb"><div class="sbf" style="width:85%"></div></div></div>
+      <div class="si">Jinja2 Templates<div class="sb"><div class="sbf" style="width:78%"></div></div></div>
+      <div class="si">AAP 2.x<div class="sb"><div class="sbf" style="width:80%"></div></div></div>
+    </div>
+    <div class="sg"><div class="sgt">Contenedores</div>
+      <div class="si">Podman<div class="sb"><div class="sbf" style="width:82%"></div></div></div>
+      <div class="si">Pods<div class="sb"><div class="sbf" style="width:78%"></div></div></div>
+      <div class="si">Containerfiles<div class="sb"><div class="sbf" style="width:75%"></div></div></div>
+      <div class="si">systemd units<div class="sb"><div class="sbf" style="width:80%"></div></div></div>
+    </div>
+    <div class="sg"><div class="sgt">Servicios de Red</div>
+      <div class="si">DNS / BIND9<div class="sb"><div class="sbf" style="width:82%"></div></div></div>
+      <div class="si">Apache / Nginx<div class="sb"><div class="sbf" style="width:84%"></div></div></div>
+      <div class="si">NFS / Samba<div class="sb"><div class="sbf" style="width:80%"></div></div></div>
+      <div class="si">MariaDB<div class="sb"><div class="sbf" style="width:75%"></div></div></div>
+    </div>
+    <div class="sg"><div class="sgt">Herramientas</div>
+      <div class="si">Git<div class="sb"><div class="sbf" style="width:80%"></div></div></div>
+      <div class="si">Vagrant<div class="sb"><div class="sbf" style="width:78%"></div></div></div>
+      <div class="si">ansible-lint<div class="sb"><div class="sbf" style="width:75%"></div></div></div>
+      <div class="si">VS Code<div class="sb"><div class="sbf" style="width:85%"></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="proyectos" style="background:var(--bg2)">
+  <div class="s-label fade-in">04 · Proyectos</div>
+  <div class="s-title fade-in">Portfolio GitHub</div>
+  <div class="pg fade-in">
+    <div class="pc">
+      <div class="ph"><div class="picon">🏗️</div><div class="plang"><div class="ld" style="background:#f5c518"></div>YAML · Ansible</div></div>
+      <div class="pb">
+        <div class="pt">rhel-datacenter-lab</div>
+        <div class="pd">Datacenter completo automatizado: DNS + Apache/TLS + HAProxy + NFS + Samba + MariaDB + Podman. 3 VMs orquestadas con Vagrant. Este servidor es parte del lab.</div>
+        <div class="tags"><span class="tag">Ansible</span><span class="tag">BIND9</span><span class="tag">HAProxy</span><span class="tag">NFS</span><span class="tag">Podman</span><span class="tag">Vagrant</span></div>
+      </div>
+      <div class="pf"><a href="https://github.com/tuusuario/rhel-datacenter-lab">⎋ GitHub →</a></div>
+    </div>
+    <div class="pc">
+      <div class="ph"><div class="picon">🔐</div><div class="plang"><div class="ld" style="background:#f5c518"></div>YAML · Bash</div></div>
+      <div class="pb">
+        <div class="pt">rhel-hardening-baseline</div>
+        <div class="pd">Rol Ansible de hardening CIS: SELinux enforcing, firewalld, auditd, SSH hardening y política de contraseñas.</div>
+        <div class="tags"><span class="tag">SELinux</span><span class="tag">firewalld</span><span class="tag">auditd</span><span class="tag">CIS</span></div>
+      </div>
+      <div class="pf"><a href="#">⎋ GitHub →</a></div>
+    </div>
+    <div class="pc">
+      <div class="ph"><div class="picon">📦</div><div class="plang"><div class="ld" style="background:#3584e4"></div>Podman · systemd</div></div>
+      <div class="pb">
+        <div class="pt">podman-systemd-lab</div>
+        <div class="pd">Contenedores rootless con Podman integrados con systemd. Pods multi-contenedor, volúmenes persistentes y Containerfiles personalizados.</div>
+        <div class="tags"><span class="tag">Podman</span><span class="tag">Rootless</span><span class="tag">systemd</span><span class="tag">EX188</span></div>
+      </div>
+      <div class="pf"><a href="#">⎋ GitHub →</a></div>
+    </div>
+    <div class="pc">
+      <div class="ph"><div class="picon">💾</div><div class="plang"><div class="ld" style="background:#89e051"></div>Bash · Ansible</div></div>
+      <div class="pb">
+        <div class="pt">rhel-storage-automation</div>
+        <div class="pd">Automatización de LVM, formateo XFS, montaje persistente y backup con rsync programado con cron.</div>
+        <div class="tags"><span class="tag">LVM</span><span class="tag">XFS</span><span class="tag">rsync</span><span class="tag">cron</span></div>
+      </div>
+      <div class="pf"><a href="#">⎋ GitHub →</a></div>
+    </div>
+  </div>
+</section>
+
+<section id="contacto" style="background:var(--bg)">
+  <div class="contact-in fade-in">
+    <div class="s-label">05 · Contacto</div>
+    <div class="s-title">¿Hablamos?</div>
+    <div class="cemail">tu@email.com</div>
+    <p style="color:#888;font-size:.85rem">Busco primer puesto como Linux SysAdmin, DevOps Junior o Infrastructure Engineer. Remoto o híbrido · Madrid · Guardias OK.</p>
+    <div class="clinks">
+      <a href="mailto:tu@email.com" class="btn btn-p">✉ Email</a>
+      <a href="#" class="btn btn-g">LinkedIn →</a>
+      <a href="https://github.com/tuusuario" class="btn btn-g">GitHub →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div>Desplegado con <strong>Ansible</strong> en <strong>RHEL</strong> · {{ inventory_hostname }}</div>
+  <div>RH124 · RH134 · RH358 · RH294 · EX188</div>
+</footer>
+
+<script>
+const obs=new IntersectionObserver(e=>e.forEach(x=>x.isIntersecting&&x.target.classList.add('v')),{threshold:.1});
+document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

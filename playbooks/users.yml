@@ -1,0 +1,6 @@
+---
+# playbooks/users.yml — RH124
+- name: Manage users across all servers
+  hosts: all_managed
+  roles:
+    - users

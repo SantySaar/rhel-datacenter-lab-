@@ -1,0 +1,6 @@
+---
+# playbooks/storage.yml — RH134
+- name: Configure storage on all managed hosts
+  hosts: all_managed
+  roles:
+    - storage

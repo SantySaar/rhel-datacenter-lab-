@@ -1,0 +1,77 @@
+---
+# roles/storage/tasks/main.yml — RH134
+
+- name: Install LVM and XFS tools
+  ansible.builtin.dnf:
+    name:
+      - lvm2
+      - xfsprogs
+      - quota
+    state: present
+  tags: storage, lvm
+
+- name: Create Volume Group vg_lab
+  community.general.lvg:
+    vg: vg_lab
+    pvs: "{{ storage_pvs | default('/dev/sdb') }}"
+    state: present
+  ignore_errors: true
+  tags: storage, lvm
+
+- name: Create Logical Volumes
+  community.general.lvol:
+    vg: vg_lab
+    lv: "{{ item.name }}"
+    size: "{{ item.size }}"
+    state: present
+  loop: "{{ lvm_volumes | default([]) }}"
+  ignore_errors: true
+  tags: storage, lvm
+
+- name: Format LVs with XFS
+  community.general.filesystem:
+    fstype: xfs
+    dev: "/dev/vg_lab/{{ item.name }}"
+  loop: "{{ lvm_volumes | default([]) }}"
+  ignore_errors: true
+  tags: storage, xfs
+
+- name: Create mount points
+  ansible.builtin.file:
+    path: "{{ item.mount }}"
+    state: directory
+    mode: '0755'
+  loop: "{{ lvm_volumes | default([]) }}"
+  when: item.mount is defined
+  tags: storage
+
+- name: Mount LVs and persist in fstab
+  ansible.posix.mount:
+    path: "{{ item.mount }}"
+    src: "/dev/vg_lab/{{ item.name }}"
+    fstype: xfs
+    opts: defaults
+    state: mounted
+  loop: "{{ lvm_volumes | default([]) }}"
+  when: item.mount is defined
+  ignore_errors: true
+  tags: storage
+
+- name: Deploy rsync backup script
+  ansible.builtin.template:
+    src: backup.sh.j2
+    dest: /usr/local/bin/lab-backup.sh
+    owner: root
+    group: root
+    mode: '0750'
+  tags: storage, backup
+
+- name: Schedule backup with cron
+  ansible.builtin.cron:
+    name: "lab daily backup"
+    minute: "0"
+    hour: "2"
+    job: "/usr/local/bin/lab-backup.sh >> /var/log/lab-backup.log 2>&1"
+    user: root
+    state: present
+  tags: storage, backup, cron
