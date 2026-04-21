@@ -24,22 +24,26 @@
 
 Despliegue automatizado de un **datacenter de 3 nodos Rocky Linux 9** con:
 
-- **12 roles Ansible** modulares y reutilizables
-- **6 playbooks** para despliegues parciales y totales
+- **12 roles Ansible** modulares y reutilizables.
+- **6 playbooks** para despliegues parciales y totales.
 - **7 servicios de red** en producción (Apache/TLS, HAProxy, DNS, NFS, Samba, MariaDB, Podman)
 - **Hardening completo**: SELinux enforcing, firewalld, SSH hardening, auditd, pwquality
-- **Secretos cifrados** con Ansible Vault
+- **Secretos cifrados** con Ansible Vault.
 - **Todo reproducible** con un solo comando: `ansible-playbook site.yml`
 
 ---
-
 ## 🛠️ Stack técnico
 
 **Sistemas:** Rocky Linux 9, RHEL 9, systemd, LVM, XFS, Bash
+
 **Automatización:** Ansible (Playbooks, Roles, Vault, Jinja2, Handlers, Tags, Collections, AAP 2.x)
+
 **Servicios:** Apache, mod_ssl, HAProxy, BIND9, NFS v4, Samba, MariaDB
+
 **Seguridad:** SELinux, firewalld, SSH hardening, auditd, Ansible Vault, pwquality
+
 **Contenedores:** Podman rootless, systemd units, volúmenes persistentes
+
 **Herramientas:** Git, Vagrant, VirtualBox, ansible-lint
 
 ---
@@ -57,13 +61,13 @@ Despliegue automatizado de un **datacenter de 3 nodos Rocky Linux 9** con:
   │         │ SSH (Ansible managed)             │
   │    ┌────┴──────────────────┐                │
   │    │                       │                │
-  │  ┌─▼────────────┐  ┌───────▼──────────┐    │
-  │  │  web         │  │  services        │    │
-  │  │  .56.20      │  │  .56.30          │    │
-  │  │  Apache/TLS  │  │  DNS + NFS       │    │
-  │  │  HAProxy     │  │  Samba + MariaDB │    │
-  │  │  Podman      │  │                  │    │
-  │  └──────────────┘  └──────────────────┘    │
+  │  ┌─▼────────────┐  ┌───────▼──────────┐     │
+  │  │  web         │  │  services        │     │ 
+  │  │  .56.20      │  │  .56.30          │     │
+  │  │  Apache/TLS  │  │  DNS + NFS       │     │
+  │  │  HAProxy     │  │  Samba + MariaDB │     │
+  │  │  Podman      │  │                  │     │
+  │  └──────────────┘  └──────────────────┘     │
   │                                             │
   │  Red host-only: 192.168.56.0/24             │
   └─────────────────────────────────────────────┘
