@@ -1,32 +1,50 @@
 # rhel-datacenter-lab 🏗️
 
-> Portfolio técnico: datacenter completo automatizado con Ansible sobre Rocky Linux 9 (compatible RHEL 9).
-> Demuestra la formación oficial Red Hat completa: **RH124 · RH134 · RH358 · RH294/AU374/AU467 · EX188**
+> Datacenter empresarial completo automatizado con Ansible sobre Rocky Linux 9 (compatible RHEL 9).
+> Demuestra la formación oficial Red Hat: **RH124 · RH134 · RH358 · RH294/AU374/AU467 · EX188**
+
+![Rocky Linux](https://img.shields.io/badge/Rocky_Linux-9-10B981?logo=rockylinux&logoColor=white)
+![Ansible](https://img.shields.io/badge/Ansible-Automation-EE0000?logo=ansible&logoColor=white)
+![Podman](https://img.shields.io/badge/Podman-Rootless-892CA0?logo=podman&logoColor=white)
+![SELinux](https://img.shields.io/badge/SELinux-Enforcing-red)
+![License](https://img.shields.io/badge/License-MIT-blue)
 
 ---
 
-## ¿Qué hace este proyecto?
+## 📸 Screenshots
 
-Despliega automáticamente un entorno de datacenter con **3 VMs** y los siguientes servicios:
-
-| Servicio | VM | Role Ansible | Curso |
-|---|---|---|---|
-| Apache + TLS | web (192.168.56.20) | `webserver` | RH358 |
-| HAProxy load balancer | web (192.168.56.20) | `haproxy` | RH358 |
-| Podman + systemd | web (192.168.56.20) | `podman` | EX188 |
-| DNS autoritativo BIND9 | services (192.168.56.30) | `dns` | RH358 |
-| NFS server v4 | services (192.168.56.30) | `nfs` | RH358 |
-| Samba SMB/CIFS | services (192.168.56.30) | `samba` | RH358 |
-| MariaDB | services (192.168.56.30) | `mariadb` | RH358 |
-| CIS Hardening (todos) | all\_managed | `hardening` | RH134 |
-| LVM + XFS + backup | all\_managed | `storage` | RH134 |
-| Usuarios + SSH keys | all\_managed | `users` | RH124 |
-
-El **portfolio web** se sirve desde Apache como template Jinja2 con datos reales del servidor — desplegado por Ansible.
+<!-- Añade aquí las capturas cuando las tengas -->
+<!-- ![Portfolio web](docs/img/portfolio.png) -->
+<!-- ![HAProxy stats](docs/img/haproxy-stats.png) -->
+<!-- ![Ansible playbook](docs/img/ansible-run.png) -->
 
 ---
 
-## Arquitectura
+## 🎯 Qué demuestra este proyecto
+
+Despliegue automatizado de un **datacenter de 3 nodos Rocky Linux 9** con:
+
+- **12 roles Ansible** modulares y reutilizables
+- **6 playbooks** para despliegues parciales y totales
+- **7 servicios de red** en producción (Apache/TLS, HAProxy, DNS, NFS, Samba, MariaDB, Podman)
+- **Hardening completo**: SELinux enforcing, firewalld, SSH hardening, auditd, pwquality
+- **Secretos cifrados** con Ansible Vault
+- **Todo reproducible** con un solo comando: `ansible-playbook site.yml`
+
+---
+
+## 🛠️ Stack técnico
+
+**Sistemas:** Rocky Linux 9, RHEL 9, systemd, LVM, XFS, Bash
+**Automatización:** Ansible (Playbooks, Roles, Vault, Jinja2, Handlers, Tags, Collections, AAP 2.x)
+**Servicios:** Apache, mod_ssl, HAProxy, BIND9, NFS v4, Samba, MariaDB
+**Seguridad:** SELinux, firewalld, SSH hardening, auditd, Ansible Vault, pwquality
+**Contenedores:** Podman rootless, systemd units, volúmenes persistentes
+**Herramientas:** Git, Vagrant, VirtualBox, ansible-lint
+
+---
+
+## 🏛️ Arquitectura
 
 ```
   Windows Host (VirtualBox)
@@ -39,21 +57,50 @@ El **portfolio web** se sirve desde Apache como template Jinja2 con datos reales
   │         │ SSH (Ansible managed)             │
   │    ┌────┴──────────────────┐                │
   │    │                       │                │
-  │  ┌─▼────────────┐  ┌───────▼──────────┐    │
-  │  │  web         │  │  services        │    │
-  │  │  .56.20      │  │  .56.30          │    │
-  │  │  Apache/TLS  │  │  DNS + NFS       │    │
-  │  │  HAProxy     │  │  Samba + MariaDB │    │
-  │  │  Podman      │  │                  │    │
-  │  └──────────────┘  └──────────────────┘    │
+  │  ┌─▼────────────┐  ┌───────▼──────────┐     │
+  │  │  web         │  │  services        │     │
+  │  │  .56.20      │  │  .56.30          │     │
+  │  │  Apache/TLS  │  │  DNS + NFS       │     │
+  │  │  HAProxy     │  │  Samba + MariaDB │     │
+  │  │  Podman      │  │                  │     │
+  │  └──────────────┘  └──────────────────┘     │
   │                                             │
-  │  Red host-only: 192.168.56.0/24            │
+  │  Red host-only: 192.168.56.0/24             │
   └─────────────────────────────────────────────┘
 ```
 
 ---
 
-## Estructura del proyecto
+## 🎓 Formación Red Hat demostrada
+
+| Curso | Contenido | Roles / Ficheros |
+|---|---|---|
+| **RH124** — System Administration I | Shell, usuarios, SSH, DNF, systemd, permisos, NetworkManager | `common`, `users` |
+| **RH134** — System Administration II | LVM, SELinux, firewalld, Grub2, scripting, tuning, troubleshooting | `hardening`, `storage` |
+| **RH358** — Services Management | DNS/BIND9, Apache, MariaDB, NFS, Samba, iSCSI, HAProxy | `webserver`, `haproxy`, `dns`, `nfs`, `samba`, `mariadb` |
+| **RH294 / AU374 / AU467** — Ansible Automation | Playbooks, roles, Vault, Collections, Jinja2, AAP 2.x | Toda la estructura Ansible del repo |
+| **EX188** — Podman | Rootless containers, pods, volúmenes, systemd units | `podman` |
+
+---
+
+## 🚀 Servicios desplegados
+
+| Servicio | VM | Role Ansible | Curso |
+|---|---|---|---|
+| Apache + TLS | web (192.168.56.20) | `webserver` | RH358 |
+| HAProxy load balancer | web (192.168.56.20) | `haproxy` | RH358 |
+| Podman + systemd | web (192.168.56.20) | `podman` | EX188 |
+| DNS autoritativo BIND9 | services (192.168.56.30) | `dns` | RH358 |
+| NFS server v4 | services (192.168.56.30) | `nfs` | RH358 |
+| Samba SMB/CIFS | services (192.168.56.30) | `samba` | RH358 |
+| MariaDB | services (192.168.56.30) | `mariadb` | RH358 |
+| Hardening + SELinux | all_managed | `hardening` | RH134 |
+| LVM + XFS + backup | all_managed | `storage` | RH134 |
+| Usuarios + SSH keys | all_managed | `users` | RH124 |
+
+---
+
+## 📁 Estructura del proyecto
 
 ```
 rhel-datacenter-lab/
@@ -97,9 +144,10 @@ rhel-datacenter-lab/
     └── Vagrantfile    ← define las 3 VMs
 ```
 
+
 ---
 
-## Inicio rápido en Windows
+## ⚡ Inicio rápido
 
 ### Requisitos previos
 1. [VirtualBox](https://www.virtualbox.org/wiki/Downloads) + Extension Pack
@@ -123,7 +171,7 @@ vagrant status
 # 4. Acceder al nodo control
 vagrant ssh control
 
-# 5. Clonar el proyecto dentro del control
+# 5. Dentro del control, clonar el proyecto
 git clone https://github.com/SantySaar/rhel-datacenter-lab-.git
 cd rhel-datacenter-lab
 
@@ -139,13 +187,13 @@ ansible-playbook playbooks/site.yml
 
 ### Verificar el resultado
 Desde tu navegador en Windows:
-- **Portfolio web**: http://localhost:8080
-- **HAProxy stats**: http://localhost:8404/stats
-- **Podman container**: http://localhost:8090
+- **Portfolio web** → http://localhost:8080
+- **HAProxy stats** → http://localhost:8404/stats
+- **Podman container** → http://localhost:8090
 
 ---
 
-## Comandos útiles
+## 🔧 Comandos útiles
 
 ```bash
 # Ejecutar solo un rol
@@ -168,7 +216,7 @@ ansible all_managed -m command -a "df -h"
 # Ad-hoc: reiniciar un servicio
 ansible web.lab.local -m service -a "name=httpd state=restarted" --become
 
-# Gestión del vault
+# Gestión del Vault
 ansible-vault encrypt inventory/group_vars/vault.yml
 ansible-vault edit inventory/group_vars/vault.yml
 ansible-playbook playbooks/site.yml --ask-vault-pass
@@ -176,16 +224,19 @@ ansible-playbook playbooks/site.yml --ask-vault-pass
 
 ---
 
-## Formación que respalda este proyecto
+## 📚 Documentación adicional
 
-| Curso | Contenido | Roles |
-|---|---|---|
-| RH124 | Shell, usuarios, SSH, DNF, systemd | `common`, `users` |
-| RH134 | SELinux, firewalld, LVM, scripting | `hardening`, `storage` |
-| RH358 | DNS, Apache, NFS, Samba, MariaDB, HAProxy | `webserver`, `haproxy`, `dns`, `nfs`, `samba`, `mariadb` |
-| RH294/AU374/AU467 | Ansible: playbooks, roles, Vault, Jinja2, Collections | Toda la estructura |
-| EX188 | Podman rootless, pods, systemd integration | `podman` |
+- [`docs/course-mapping.md`](docs/course-mapping.md) — Mapeo detallado curso → fichero
+- [`docs/troubleshooting.md`](docs/troubleshooting.md) — Problemas comunes y soluciones
+- [`docs/lab-journal.md`](docs/lab-journal.md) — Diario de errores reales resueltos
 
 ---
 
-*Portfolio técnico — Linux & Ansible Engineer · Madrid, España*
+## 👤 Autor
+
+**Santiago Alameda Recuero** — Linux SysAdmin Junior · Madrid, España
+[LinkedIn](https://www.linkedin.com/in/santiagoalamedarecuero322/) · [GitHub](https://github.com/SantySaar)
+
+---
+
+*Portfolio técnico — Linux & Ansible · Madrid, España*
